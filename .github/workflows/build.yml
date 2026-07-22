@@ -1,0 +1,38 @@
+name: Build TrollActivate dylib
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Theos
+        uses: Randomblock1/theos-action@v1
+
+      - name: Build dylib
+        run: |
+          make clean
+          make
+
+      - name: Locate output
+        run: |
+          find . -name "*.dylib" -exec ls -la {} \;
+
+      - name: Collect release
+        run: |
+          mkdir -p release
+          find .theos/obj -name "*.dylib" -exec cp {} release/ \;
+          ls -la release/
+
+      - name: Upload dylib
+        uses: actions/upload-artifact@v4
+        with:
+          name: TrollActivate-dylib
+          path: release/
+          if-no-files-found: error
